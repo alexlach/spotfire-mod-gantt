@@ -4,6 +4,7 @@ export function createScalePopout(
     controls: Controls,
     overdue: ModProperty<boolean>,
     weekend: ModProperty<boolean>,
+    sortByDate: ModProperty<boolean>,
     popoutClosedEventEmitter: any
 ) {
     const { checkbox } = controls.popout.components;
@@ -34,6 +35,16 @@ export function createScalePopout(
                     enabled: true
                 })
             ]
+        }),
+        section({
+            children: [
+                checkbox({
+                    name: sortByDate.name,
+                    text: "Sort by start date",
+                    checked: is(sortByDate)(true),
+                    enabled: true
+                })
+            ]
         })
     ];
 
@@ -48,6 +59,7 @@ export function createScalePopout(
                     const { name, value } = event;
                     name == overdue.name && overdue.set(value);
                     name == weekend.name && weekend.set(value);
+                    name == sortByDate.name && sortByDate.set(value);
                 },
                 onClosed: () => {
                     popoutClosedEventEmitter.emit("popoutClosed");

@@ -20,6 +20,7 @@ export interface Config {
     defaultBarColor: string,
     showOverdue: boolean,
     showWeekend: boolean,
+    sortByDate: boolean,
     onScaleClick(x: number, y: number): void;
 }
 
@@ -42,8 +43,9 @@ export let config: Config = {
     spaceBetweenGroups: 24,
     minPadding: 8, 
     maxLabelsWidthPercentage: 0.2,
-    defaultBarColor: "#a0a0a0", 
+    defaultBarColor: "#a0a0a0",
     onScaleClick: null,
     showOverdue: false,
-    showWeekend: false
+    showWeekend: false,
+    sortByDate: false
 };
