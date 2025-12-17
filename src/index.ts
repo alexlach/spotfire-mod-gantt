@@ -22,7 +22,8 @@ Spotfire.initialize(async (mod) => {
         mod.visualization.axis("Color"),
         mod.windowSize(),
         mod.property<boolean>("overdue"),
-        mod.property<boolean>("weekend")
+        mod.property<boolean>("weekend"),
+        mod.property<boolean>("sortByDate")
     );
 
     /**
@@ -62,7 +63,8 @@ Spotfire.initialize(async (mod) => {
         colorAxis: Axis,
         windowsSize: Spotfire.Size,
         overdue: ModProperty<boolean>,
-        weekend: ModProperty<boolean>
+        weekend: ModProperty<boolean>,
+        sortByDate: ModProperty<boolean>
     ) {
         let root = await (await dataView.hierarchy("Task")).root();
         const tooltip: Tooltip = mod.controls.tooltip;
@@ -109,11 +111,18 @@ Spotfire.initialize(async (mod) => {
 
         if (context.isEditing) {
             var popoutClosedEventEmitter = new events.EventEmitter();
-            config.onScaleClick = createScalePopout(mod.controls, overdue, weekend, popoutClosedEventEmitter);
+            config.onScaleClick = createScalePopout(
+                mod.controls,
+                overdue,
+                weekend,
+                sortByDate,
+                popoutClosedEventEmitter
+            );
         }
 
         config.showOverdue = overdue.value();
         config.showWeekend = weekend.value();
+        config.sortByDate = sortByDate.value();
 
         await render(tasks, dataView, state, minDate, maxDate, tooltip, styling, windowsSize, context.interactive);
         context.signalRenderComplete();
@@ -127,7 +136,10 @@ Spotfire.initialize(async (mod) => {
         function buildTasks(tasksRootNode: DataViewHierarchyNode): GanttData[] {
             let flattenedTasks: GanttData[] = [];
 
-            tasksRootNode.children.forEach(addTasksFromHierarchyNode);
+            const children = config.sortByDate
+                ? tasksRootNode.children.slice().sort(sortNodes)
+                : tasksRootNode.children;
+            children.forEach(addTasksFromHierarchyNode);
 
             return flattenedTasks;
 
@@ -135,7 +147,8 @@ Spotfire.initialize(async (mod) => {
                 flattenedTasks.push(addTask(node));
 
                 if (node.children) {
-                    node.children.slice().sort(sortNodes).forEach(addTasksFromHierarchyNode);
+                    const children = config.sortByDate ? node.children.slice().sort(sortNodes) : node.children;
+                    children.forEach(addTasksFromHierarchyNode);
                 }
             }
 
